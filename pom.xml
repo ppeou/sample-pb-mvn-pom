@@ -46,10 +46,11 @@
                                 </path>
                                 <pathconvert pathsep=" " property="pb.files" refid="pb.path" />
 
+
                                 <echo message="Generate bundles from ${pb.files}" ></echo>
                                 <exec executable="cmd" failonerror="true"
                                       output="${protobuf-output}/browserify.txt">
-                                    <arg line="/c browserify" />
+                                    <arg line="/c browserify --no-dedupe" />
                                     <arg line="-r ./${google-core-pb}:google-protobuf" />
                                     <arg line="${pb.files}" />
                                     <arg line="> ${protobuf-output}/bundles.js" />

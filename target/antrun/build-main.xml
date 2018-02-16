@@ -21,7 +21,7 @@
   <pathconvert property="pb.files" pathsep=" " refid="pb.path"/>
   <echo message="Generate bundles from ${pb.files}"></echo>
   <exec output="target/outout/proto/browserify.txt" failonerror="true" executable="cmd">
-    <arg line="/c browserify"/>
+    <arg line="/c browserify --no-dedupe"/>
     <arg line="-r ./lib/google-core_pb.js:google-protobuf"/>
     <arg line="${pb.files}"/>
     <arg line="&gt; target/outout/proto/bundles.js"/>
