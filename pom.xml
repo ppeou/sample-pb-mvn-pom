@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>me.app</groupId>
+    <artifactId>proto-maven-build</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <properties>
+        <proto.cmd>${project.basedir}/lib/protoc.exe</proto.cmd>
+        <project-output-folder>${project.basedir}/target/outout</project-output-folder>
+        <google-core-pb>lib/google-core_pb.js</google-core-pb>
+        <protobuf-output>target/outout/proto</protobuf-output>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>compile-protoc</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <tasks>
+
+                                <path id="proto.path">
+                                    <fileset dir="proto">
+                                        <include name="**/*.proto" />
+                                    </fileset>
+                                </path>
+                                <pathconvert pathsep=" " property="proto.files" refid="proto.path" />
+
+                                <mkdir dir="${protobuf-output}" />
+                                <exec executable="${proto.cmd}" failonerror="true">
+                                    <arg value="--js_out=import_style=commonjs,binary:${protobuf-output}" />
+                                    <arg value="-I${project.basedir}/" />
+                                    <arg line="${proto.files}"/>
+                                </exec>
+
+                                <path id="pb.path">
+                                    <fileset dir="${protobuf-output}/proto">
+                                        <include name="**/*.js" />
+                                    </fileset>
+                                </path>
+                                <pathconvert pathsep=" " property="pb.files" refid="pb.path" />
+
+                                <echo message="Generate bundles from ${pb.files}" ></echo>
+                                <exec executable="cmd" failonerror="true"
+                                      output="${protobuf-output}/browserify.txt">
+                                    <arg line="/c browserify" />
+                                    <arg line="-r ./${google-core-pb}:google-protobuf" />
+                                    <arg line="${pb.files}" />
+                                    <arg line="> ${protobuf-output}/bundles.js" />
+
+                                </exec>
+                                <echo message="move to bundle to web folder"></echo>
+                                <move file="${protobuf-output}/bundles.js" tofile="${project.basedir}/web/bundles.js"></move>
+
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <path id="proto.path">
+    <fileset dir="proto">
+      <include name="**/*.proto"/>
+    </fileset>
+  </path>
+  <pathconvert property="proto.files" pathsep=" " refid="proto.path"/>
+  <mkdir dir="target/outout/proto"/>
+  <exec failonerror="true" executable="H:\codes\proto-maven-build/lib/protoc.exe">
+    <arg value="--js_out=import_style=commonjs,binary:target/outout/proto"/>
+    <arg value="-IH:\codes\proto-maven-build/"/>
+    <arg line="${proto.files}"/>
+  </exec>
+  <path id="pb.path">
+    <fileset dir="target/outout/proto/proto">
+      <include name="**/*.js"/>
+    </fileset>
+  </path>
+  <pathconvert property="pb.files" pathsep=" " refid="pb.path"/>
+  <echo message="Generate bundles from ${pb.files}"></echo>
+  <exec output="target/outout/proto/browserify.txt" failonerror="true" executable="cmd">
+    <arg line="/c browserify"/>
+    <arg line="-r ./lib/google-core_pb.js:google-protobuf"/>
+    <arg line="${pb.files}"/>
+    <arg line="&gt; target/outout/proto/bundles.js"/>
+  </exec>
+  <echo message="move to bundle to web folder"></echo>
+  <move file="target/outout/proto/bundles.js" tofile="H:\codes\proto-maven-build/web/bundles.js"></move>
+</target>
+</project>
